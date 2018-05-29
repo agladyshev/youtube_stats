@@ -1,0 +1,19 @@
+{
+  "name": "influencers",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agladyshev/influencers.git"
+  },
+  "author": "Alexey Gladyshev",
+  "license": "SEE LICENSE IN license.txt",
+  "bugs": {
+    "url": "https://github.com/agladyshev/influencers/issues"
+  },
+  "homepage": "https://github.com/agladyshev/influencers#readme"
+}
