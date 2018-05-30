@@ -59,17 +59,34 @@ const updateTwitterStats = async (account) => {
   // Collect a list of influencers with twitter accounts
   try {
     console.log(account);
-    // const client = await MongoClient.connect(uri, { useNewUrlParser: true });
+    const client = await MongoClient.connect(uri, { useNewUrlParser: true });
 
-    // console.log('Connected successfully to server');
+    console.log('Connected successfully to server');
 
-    // const db = client.db(process.env.DB_NAME);
+    const db = client.db(process.env.DB_NAME);
 
-    // const col = db.collection('influencers');
+    const col = db.collection('influencers');
 
-    // // Update function
+    console.log(account._id);
 
-    // client.close();
+    col.updateOne(
+      { _id: account._id }
+      , {
+        $set: {
+          twitter_id: account.twitter_id,
+          twitter_name: account.twitter_name,
+          twitter_followers: account.twitter_followers,
+          tweets: account.tweets,
+          twitter_pic: account.twitter_pic,
+          twitter_updated: Date.now(),
+        }
+      }, function(err, result) {
+        assert.equal(err, null);
+        assert.equal(1, result.result.n);
+        console.log(result);
+    });
+
+    client.close();
   } catch (e) {
     console.error(e);
   }
