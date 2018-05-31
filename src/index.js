@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 const assert = require('assert');
 const moment = require('moment');
-const unirest = require('unirest');
+const request = require('request');
 require('dotenv').config();
 
 // const client = new Youtube({
@@ -42,63 +42,62 @@ const getYoutubeProfile = async () => {
       const uri = account.twitter_id ?
         `https://www.googleapis.com/youtube/v3/channels?part=snippet%2Cstatistics&id=${account.youtube_id}&key=${process.env.API_KEY}` :
         `https://www.googleapis.com/youtube/v3/channels?part=snippet%2Cstatistics&forUsername=${account.youtube_name}&key=${process.env.API_KEY}`
-     
-      unirest.get(uri)
-        .end(function (response) {
-          const body = response.body
+    
+      request(uri, function (error, response, body) {
 
-          if ((body === undefined) || (body === null)) {
-            const youtube_status = "Name error";
-            account = Object.assign(account, {youtube_status});
-            updateProfile(account);
-            return
-          }
-
-          if (!body.pageInfo.totalResults) {
-            const youtube_status = "Not Found";
-            account = Object.assign(account, {youtube_status});
-            updateProfile(account);
-            return
-          }
-
-          const { id: youtube_id } = body.items[0]
-
-          const {
-            viewCount: youtube_views,
-            commentCount: youtube_comments,
-            subscriberCount: youtube_subscribers,
-            videoCount: youtube_videos,
-          } = body.items[0].statistics;
-
-          const {
-            title: youtube_name,
-            description: youtube_description,
-            thumbnails: thumbnails,
-          } = body.items[0].snippet;
-
-          const youtube_thumbnail = thumbnails.default.url;
-          const youtube_thumbnail_med = thumbnails.medium.url;
-          const youtube_thumbnail_high = thumbnails.high.url;
-
-          const youtube_status = 'OK';
-
-          account = Object.assign(account, {
-            youtube_id,
-            youtube_name,
-            youtube_description,
-            youtube_views,
-            youtube_comments,
-            youtube_subscribers,
-            youtube_videos,
-            youtube_thumbnail,
-            youtube_thumbnail_med,
-            youtube_thumbnail_high,
-            youtube_status,
-          });
-
+        if ((body === undefined) || (body === null)) {
+          const youtube_status = "Name error";
+          account = Object.assign(account, {youtube_status});
           updateProfile(account);
-         
+          return
+        }
+        const results = JSON.parse(body)
+
+        if (!results.pageInfo.totalResults) {
+          const youtube_status = "Not Found";
+          account = Object.assign(account, {youtube_status});
+          updateProfile(account);
+          return
+        }
+
+        const { id: youtube_id } = results.items[0]
+
+        const {
+          viewCount: youtube_views,
+          commentCount: youtube_comments,
+          subscriberCount: youtube_subscribers,
+          videoCount: youtube_videos,
+        } = results.items[0].statistics;
+
+        const {
+          title: youtube_name,
+          description: youtube_description,
+          thumbnails: thumbnails,
+        } = results.items[0].snippet;
+
+        const youtube_thumbnail = thumbnails.default.url;
+        const youtube_thumbnail_med = thumbnails.medium.url;
+        const youtube_thumbnail_high = thumbnails.high.url;
+
+        const youtube_status = 'OK';
+
+        account = Object.assign(account, {
+          youtube_id,
+          youtube_name,
+          youtube_description,
+          youtube_views,
+          youtube_comments,
+          youtube_subscribers,
+          youtube_videos,
+          youtube_thumbnail,
+          youtube_thumbnail_med,
+          youtube_thumbnail_high,
+          youtube_status,
         });
+
+        updateProfile(account);
+       
+      });
     } catch (e) {
       console.error(e);
     }
