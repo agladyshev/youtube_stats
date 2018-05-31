@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 const assert = require('assert');
 const moment = require('moment');
+const unirest = require('unirest');
 require('dotenv').config();
 
 // const client = new Youtube({
@@ -36,63 +37,102 @@ const getYoutubeAccounts = async () => {
 const getYoutubeProfile = async () => {
   // Call youtube for updated profile information
   const accounts = await getYoutubeAccounts();
-  console.log(accounts);
-  // accounts.forEach((account) => {
-  //   try {
-  //     const uri = account.youtube_id ? 
-  //     `https://api.youtube.com/1.1/users/show.json?user_id=${account.youtube_id}` :
-  //     `https://api.youtube.com/1.1/users/show.json?screen_name=${account.youtube_name}`;
-  //     client.get(uri, function (error, body, response) {
-  //       const {
-  //         id_str: youtube_id,
-  //         screen_name: youtube_name,
-  //         followers_count: youtube_followers,
-  //         statuses_count: tweets,
-  //         profile_image_url: youtube_pic,
-  //       } = body;
-  //       if (error) {
-  //         const youtube_status = error[0].message;
-  //         account = Object.assign(account, {youtube_status});
-  //       } else {
-  //         const youtube_status = 'OK';
-  //         account = Object.assign(account, {
-  //           youtube_id, youtube_name, youtube_followers, tweets, youtube_pic, youtube_status});
-  //       }
-  //       updateProfile(account);
-  //     });
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // });
+  accounts.forEach((account) => {
+    try {
+      const uri = account.twitter_id ?
+        `https://www.googleapis.com/youtube/v3/channels?part=snippet%2Cstatistics&id=${account.youtube_id}&key=${process.env.API_KEY}` :
+        `https://www.googleapis.com/youtube/v3/channels?part=snippet%2Cstatistics&forUsername=${account.youtube_name}&key=${process.env.API_KEY}`
+     
+      unirest.get(uri)
+        .end(function (response) {
+          const body = response.body
+
+          if ((body === undefined) || (body === null)) {
+            const youtube_status = "Name error";
+            account = Object.assign(account, {youtube_status});
+            updateProfile(account);
+            return
+          }
+
+          if (!body.pageInfo.totalResults) {
+            const youtube_status = "Not Found";
+            account = Object.assign(account, {youtube_status});
+            updateProfile(account);
+            return
+          }
+
+          const { id: youtube_id } = body.items[0]
+
+          const {
+            viewCount: youtube_views,
+            commentCount: youtube_comments,
+            subscriberCount: youtube_subscribers,
+            videoCount: youtube_videos,
+          } = body.items[0].statistics;
+
+          const {
+            title: youtube_name,
+            description: youtube_description,
+            thumbnails: thumbnails,
+          } = body.items[0].snippet;
+
+          const youtube_thumbnail = thumbnails.default.url;
+          const youtube_thumbnail_med = thumbnails.medium.url;
+          const youtube_thumbnail_high = thumbnails.high.url;
+
+          const youtube_status = 'OK';
+
+          account = Object.assign(account, {
+            youtube_id,
+            youtube_name,
+            youtube_description,
+            youtube_views,
+            youtube_comments,
+            youtube_subscribers,
+            youtube_videos,
+            youtube_thumbnail,
+            youtube_thumbnail_med,
+            youtube_thumbnail_high,
+            youtube_status,
+          });
+
+          updateProfile(account);
+         
+        });
+    } catch (e) {
+      console.error(e);
+    }
+  });
 };
 
-// const updateProfile = async (account) => {
-//   // Update youtube stats in database
-//   try {
-//     const client = await MongoClient.connect(uri, { useNewUrlParser: true });
-//     const db = client.db(process.env.DB_NAME);
-//     const col = db.collection('influencers');
-//     col.updateOne(
-//       { _id: account._id }
-//       , {
-//         $set: {
-//           youtube_id: account.youtube_id,
-//           youtube_name: account.youtube_name,
-//           youtube_followers: account.youtube_followers,
-//           tweets: account.tweets,
-//           youtube_pic: account.youtube_pic,
-//           youtube_status: account.youtube_status,
-//           youtube_updated: Date.now(),
-//         }
-//       }, function(err, result) {
-//         assert.equal(err, null);
-//         assert.equal(1, result.result.n);
-//     });
-//     client.close();
-//   } catch (e) {
-//     console.error(e);
-//   }
-// };
+const updateProfile = async (account) => {
+  console.log(account);
+  // Update youtube stats in database
+  // try {
+  //   const client = await MongoClient.connect(uri, { useNewUrlParser: true });
+  //   const db = client.db(process.env.DB_NAME);
+  //   const col = db.collection('influencers');
+  //   col.updateOne(
+  //     { _id: account._id }
+  //     , {
+  //       $set: {
+  //         youtube_id: account.youtube_id,
+  //         youtube_name: account.youtube_name,
+  //         youtube_followers: account.youtube_followers,
+  //         tweets: account.tweets,
+  //         youtube_pic: account.youtube_pic,
+  //         youtube_status: account.youtube_status,
+  //         youtube_updated: Date.now(),
+  //       }
+  //     }, function(err, result) {
+  //       assert.equal(err, null);
+  //       assert.equal(1, result.result.n);
+  //   });
+  //   client.close();
+  // } catch (e) {
+  //   console.error(e);
+  // }
+};
 
 // const getTweetStats = async () => {
 //   // Call youtube for user tweets
