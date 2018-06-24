@@ -88,8 +88,7 @@ const fetchVideos = async (account) => {
       account.videos = results.items;
     })
     .catch(function (err) {
-      console.log(account);
-      console.log(err);
+      account.youtube_videos_status = err.message;
     })
   return account;
 };
@@ -269,7 +268,7 @@ const calculateStats = async (req, res, next) => {
         videos_recent: 0
         })
     } else {
-      account.youtube_videos_status = 'Not available';
+      account.youtube_videos_status = account.youtube_videos_status || 'Not available';
     }
   }))
   next();
