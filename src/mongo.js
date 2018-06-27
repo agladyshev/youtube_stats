@@ -1,6 +1,7 @@
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}${process.env.DB_HOST}/test?retryWrites=true`;
 const { MongoClient } = require('mongodb');
 const assert = require('assert');
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}${process.env.DB_HOST}/test?retryWrites=true`;
 
 require('dotenv').config();
 
@@ -10,7 +11,7 @@ const getYoutubeAccounts = async () => {
   try {
     const client = await MongoClient.connect(uri, { useNewUrlParser: true });
     const db = client.db(process.env.DB_NAME);
-    const col = db.collection('influencers');
+    const col = db.collection(process.env.DB_COLLECTION);
     accounts = await col.find({ $or: [{ youtube_name: { $gt: '' } }, { youtube_id: { $gt: '' } }] }).project({ youtube_name: 1, youtube_id: 1 }).toArray();
     client.close();
   } catch (e) {
@@ -24,7 +25,7 @@ const updateYoutubeProfile = async (account) => {
   try {
     const client = await MongoClient.connect(uri, { useNewUrlParser: true });
     const db = client.db(process.env.DB_NAME);
-    const col = db.collection('influencers');
+    const col = db.collection(process.env.DB_COLLECTION);
     if (account.youtubeStatus === 'OK') {
       col.updateOne(
         { _id: account._id }
@@ -71,7 +72,7 @@ const updateYoutubeStats = async (account) => {
   try {
     const client = await MongoClient.connect(uri, { useNewUrlParser: true });
     const db = client.db(process.env.DB_NAME);
-    const col = db.collection('influencers');
+    const col = db.collection(process.env.DB_COLLECTION);
     if (account.youtubeVideoStatus === 'OK') {
       const {
         viewsRecent,
