@@ -6,7 +6,7 @@ const fetchYoutubeProfile = async (account) => {
   let updatedAccount = account;
   const uri = account.youtube_id ?
     `https://www.googleapis.com/youtube/v3/channels?part=snippet%2Cstatistics&id=${account.youtube_id}&key=${process.env.API_KEY}` :
-    `https://www.googleapis.com/youtube/v3/channels?part=snippet%2Cstatistics&forUsername=${account.youtube_name}&key=${process.env.API_KEY}` 
+    `https://www.googleapis.com/youtube/v3/channels?part=snippet%2Cstatistics&forUsername=${account.youtube_name}&key=${process.env.API_KEY}`;
   await request(uri)
     .then((body) => {
       if ((body === undefined) || (body === null)) {

@@ -116,7 +116,7 @@ app.use((req, res, next) => {
 
 app.use(getYoutubeAccounts);
 
-app.get('/', getYoutubeProfiles, updateProfiles, getVideoLists, getStats, calculateStats, updateStats, (req, res) => res.send(res.body));
+app.get('/', getYoutubeProfiles, updateProfiles, getVideoLists, getStats, calculateStats, updateStats, (req, res) => res.sendStatus(200));
 app.get('/profiles', getYoutubeProfiles, updateProfiles, (req, res) => res.sendStatus(200));
 app.get('/videos', getVideoLists, getStats, calculateStats, updateStats, (req, res) => {
   res.sendStatus(200);
