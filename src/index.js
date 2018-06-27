@@ -78,7 +78,7 @@ const calculateStats = async (req, res, next) => {
           viewsRecent: accumulator.viewsRecent + parseInt(viewCount, 10),
           likesRecent: accumulator.likesRecent + parseInt(likeCount, 10),
           dislikesRecent: accumulator.dislikesRecent + parseInt(dislikeCount, 10),
-          сommentsRecent: accumulator.commentsRecent + parseInt(commentCount, 10),
+          commentsRecent: accumulator.commentsRecent + parseInt(commentCount, 10),
           favoritesRecent: accumulator.favoritesRecent + parseInt(favoriteCount, 10),
           videosRecent: index,
         };
