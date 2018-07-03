@@ -61,7 +61,8 @@ const fetchVideos = async (account) => {
     return account;
   }
   const since = moment().subtract(process.env.STATS_SINCE_DAYS, 'days').utc().format();
-  await request(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${account.youtube_id}&order=date&type=video&publishedAfter=${since}&key=${process.env.API_KEY}`)
+  const maxResults = process.env.LAST_VIDEOS_ANALIZED;
+  await request(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${account.youtube_id}&order=date&type=video&publishedAfter=${since}&maxResults=${maxResults}&key=${process.env.API_KEY}`)
     .then((body) => {
       const results = JSON.parse(body);
       updatedAccount.videos = results.items;
