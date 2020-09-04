@@ -26,7 +26,7 @@
     "dotenv": "^5.0.1",
     "express": "^4.16.3",
     "moment": "^2.22.1",
-    "mongodb": "^3.1.0-beta4",
+    "mongodb": "^3.1.13",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.5"
   }
